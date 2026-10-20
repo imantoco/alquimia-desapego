@@ -205,6 +205,9 @@ summary:after{content:"+";position:absolute;right:2px;top:-3px;font-size:24px;co
     var cta=a.getAttribute("data-cta");
     if(tag){a.href=a.href.replace(/sck=[^&]*/,"sck=7noites_"+cta+"_"+tag);}
     a.addEventListener("click",function(){
+      /* InitiateCheckout no clique (pedido do Matheus, 2026-10-20): o checkout da Hotmart quase não emite IC
+         (10 em 36h vindos de pay.hotmart.com contra 73 LPV). Um por visita, para não inflar com clique repetido. */
+      if(window.fbq&&!window.__ic){window.__ic=1;fbq("track","InitiateCheckout",{content_name:"Desafio 7 Noites Sem Entrar no Perfil Dele",content_type:"product",value:67,currency:"BRL"},{eventID:"ic_7noites_"+Date.now()});}
       if(window.gtag)gtag("event","begin_checkout",{cta:cta,oferta:"7noites",value:67,currency:"BRL"});
       if(window.clarity)clarity("event","cta_clicado_"+cta);
     });
