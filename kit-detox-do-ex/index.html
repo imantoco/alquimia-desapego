@@ -562,8 +562,9 @@ footer p{margin:0 0 8px}
     el.addEventListener("click", function(){
       var nome = el.getAttribute("data-cta")||"cta";
       if(/checkout/.test(nome)){
-        /* InitiateCheckout do Meta NÃO sai daqui: a Hotmart já emite no carregamento do checkout
-           (navegador + CAPI). Disparar aqui também conta em dobro (mesmo erro de 21/09; corrigido 09/10). */
+        /* InitiateCheckout no clique do botão de checkout, uma vez por visita (regra do Matheus, 2026-10-20/28:
+           a Hotmart não emite IC ao carregar o checkout). */
+        if(window.fbq && !window.__ic){ window.__ic = 1; fbq("track","InitiateCheckout",{content_name:"Kit Detox do Ex v8",content_type:"product",value:67,currency:"BRL"},{eventID:"ic_v8_"+Date.now()}); }
         if(window.gtag) gtag("event","begin_checkout",{currency:"BRL",value:67,cta:nome,angulo:a});
         if(window.clarity){ clarity("event","cta_checkout"); clarity("set","cta_clicado",nome); }
       } else {

@@ -743,11 +743,12 @@ footer .disclaimer{font-size:11.5px;opacity:.78;line-height:1.55}
   });
 
   /* eventos de checkout.
-     InitiateCheckout NÃO dispara aqui: quem emite é o checkout da Hotmart no load,
-     por POST para facebook.com/tr e pela API de Conversões. Disparar aqui conta 2x. */
+     InitiateCheckout dispara aqui, no clique do botão de checkout, uma vez por visita
+     (regra do Matheus, 2026-10-20/28: a Hotmart não emite IC ao carregar o checkout). */
   document.querySelectorAll("a.cta").forEach(function (a) {
     a.addEventListener("click", function () {
       var nome = a.getAttribute("data-cta");
+      if (window.fbq && !window.__ic && /hotmart/.test(a.href)) { window.__ic = 1; fbq("track", "InitiateCheckout", { content_name: "Kit Detox do Ex", content_type: "product", value: 87, currency: "BRL" }, { eventID: "ic_" + Date.now() }); }
       if (window.gtag) gtag("event", "begin_checkout", { value: 87, currency: "BRL", cta: nome });
       if (window.clarity) { clarity("event", "cta_checkout"); clarity("set", "cta_clicado", nome); }
     });
