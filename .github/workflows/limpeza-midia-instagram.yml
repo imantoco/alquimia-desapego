@@ -1,0 +1,39 @@
+# Limpeza mensal das mídias de post já publicado no Instagram (Imanto-OS: infra/limpeza-vps/README.md).
+# Pedido do Matheus em 2026-11-16: apagar sozinho, todo mês, o que já foi publicado, sem depender do Mac Mini.
+# Apaga as pastas ig-*/hq/* (uma por post, hospedada pelo publicar_ig.py só para a Meta buscar a mídia) cujo último commit
+# tem mais de 7 dias. Seguro: o publicar_ig.py re-hospeda a pasta na hora de publicar, então post agendado não quebra.
+# Não toca em nada fora de ig-*/hq/* (site, anúncios, outras pastas).
+name: limpeza-midia-instagram
+on:
+  schedule:
+    - cron: "0 9 1 * *"   # dia 1, 06:00 de Brasília
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency: limpeza-midia
+jobs:
+  limpar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          fetch-depth: 0
+          filter: blob:none
+      - name: apagar pastas de post com mais de 7 dias
+        run: |
+          set -eu
+          corte=$(date -d '7 days ago' +%s)
+          n=0
+          for d in ig-*/hq/*/; do
+            [ -d "$d" ] || continue
+            t=$(git log -1 --format=%ct -- "$d")
+            if [ -n "$t" ] && [ "$t" -lt "$corte" ]; then git rm -rq -- "$d"; n=$((n+1)); fi
+          done
+          echo "pastas apagadas: $n"
+          [ "$n" -gt 0 ] || exit 0
+          git config user.name "imanto-limpeza"
+          git config user.email "limpeza@imanto.com.br"
+          git commit -qm "limpeza mensal: $n pasta(s) de post já publicado"
+          for i in 1 2 3; do git pull -q --rebase origin gh-pages && git push -q origin HEAD:gh-pages && exit 0; sleep 10; done
+          exit 1
